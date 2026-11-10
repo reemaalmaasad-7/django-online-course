@@ -1,0 +1,11 @@
+{% extends 'onlinecourse/base.html' %}
+{% block content %}
+<div class="card shadow-sm mb-4"><div class="card-body"><h1>{{ course.name }}</h1><p class="lead">{{ course.description }}</p>{% if course.instructor %}<p>Instructor: {{ course.instructor.name }}</p>{% endif %}</div></div>
+<h2>Lessons</h2>
+<div class="accordion mb-5" id="lessons">{% for lesson in course.lessons.all %}<div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#lesson{{ lesson.pk }}">{{ lesson.title }}</button></h3><div id="lesson{{ lesson.pk }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#lessons"><div class="accordion-body">{{ lesson.content|linebreaks }}</div></div></div>{% empty %}<p>No lessons available.</p>{% endfor %}</div>
+<h2>Course Assessment</h2>
+{% if user.is_authenticated %}<form method="post" action="{% url 'submit' course.pk %}">{% csrf_token %}
+{% for question in questions %}<div class="card mb-3"><div class="card-body"><h5>{{ forloop.counter }}. {{ question.text }}</h5>{% for choice in question.choices.all %}<div class="form-check"><input class="form-check-input" type="radio" name="question_{{ question.pk }}" id="choice{{ choice.pk }}" value="{{ choice.pk }}" required><label class="form-check-label" for="choice{{ choice.pk }}">{{ choice.text }}</label></div>{% endfor %}</div></div>{% empty %}<p>No questions available.</p>{% endfor %}
+{% if questions %}<button class="btn btn-success" type="submit">Submit exam</button>{% endif %}</form>{% else %}<div class="alert alert-info">Please <a href="/admin/login/?next={{ request.path|urlencode }}">log in</a> to take the exam.</div>{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
